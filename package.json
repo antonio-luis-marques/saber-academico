@@ -1,0 +1,41 @@
+{
+  "name": "academia-educacao",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.1.0",
+    "@hookform/resolvers": "^3.9.1",
+    "@mui/icons-material": "^6.4.1",
+    "@mui/material": "^6.4.1",
+    "@plaiceholder/next": "^3.0.0",
+    "@portabletext/react": "^3.1.0",
+    "axios": "^1.7.8",
+    "embla-carousel-react": "^8.5.1",
+    "lucide-react": "^0.451.0",
+    "motion": "^11.12.0",
+    "next": "14.2.12",
+    "plaiceholder": "^3.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-dropzone": "^14.3.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.12",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
