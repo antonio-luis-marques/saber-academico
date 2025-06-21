@@ -142,10 +142,13 @@ function QuestionCard({
       }}
     >
       {loading && (
-        <Box sx={{ padding: 2 }}>
-          <DataCardSkeleton />
-        </Box>
+        [1, 2, 3, 4].map((_, index) => (
+          <Box key={index} sx={{ width: '100%' }}>
+            <DataCardSkeleton />
+          </Box>
+        ))
       )}
+
 
       {error && (
         <Box role="alert" sx={{ color: 'error.main', padding: 2 }}>

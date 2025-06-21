@@ -1,91 +1,104 @@
-'use client'
+'use client';
+
 import { useState } from 'react';
-import { Box, TextField, Button, Typography, Grid, Paper } from '@mui/material';
-import { useDropzone } from 'react-dropzone';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Grid,
+  IconButton,
+} from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { z } from 'zod';
 import axios from 'axios';
 
 const formSchema = z.object({
   title: z.string().min(1, { message: 'O título é obrigatório' }),
-  description: z.string().min(1, { message: 'A descrição é obrigatória' }),
-  pdfFile: z.instanceof(File).refine((file) => file.type === 'application/pdf', {
-    message: 'Por favor, carregue um ficheiro PDF',
-  }),
-  imageFile: z.instanceof(File).refine((file) => file.type.startsWith('image'), {
-    message: 'Por favor, carregue um ficheiro de imagem',
-  }),
+  year: z
+    .number({ invalid_type_error: 'O ano deve ser um número' })
+    .min(2000, { message: 'Ano mínimo permitido: 2000' })
+    .max(2100, { message: 'Ano máximo permitido: 2100' }),
+  institution: z.string().min(1, { message: 'A instituição é obrigatória' }),
+  images: z
+    .array(z.instanceof(File).refine((file) => file.type.startsWith('image/'), {
+      message: 'Apenas imagens são permitidas',
+    }))
+    .min(1, { message: 'Adicione pelo menos uma imagem' }),
 });
 
 export default function Form() {
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [year, setYear] = useState('');
+  const [institution, setInstitution] = useState('');
+  const [images, setImages] = useState<(File | null)[]>([null]);
   const [errors, setErrors] = useState<string[]>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const { getRootProps: getDropzoneProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      const pdf = acceptedFiles.find((file) => file.type === 'application/pdf');
-      const image = acceptedFiles.find((file) => file.type.startsWith('image'));
-      if (pdf) setPdfFile(pdf);
-      if (image) {
-        setImageFile(image);
-        const previewUrl = URL.createObjectURL(image);
-        setImagePreview(previewUrl);
-      }
-    },
-    multiple: true,
-  });
+  const handleImageChange = (index: number, file: File | null) => {
+    const updated = [...images];
+    updated[index] = file;
+    setImages(updated);
+  };
+
+  const addImageField = () => {
+    setImages([...images, null]);
+  };
+
+  const removeImageField = (index: number) => {
+    const updated = [...images];
+    updated.splice(index, 1);
+    setImages(updated);
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setErrors([]);
 
     try {
-      // Validação do esquema
+      // Validação
+      const validImages = images.filter((img): img is File => img !== null);
       formSchema.parse({
         title,
-        description,
-        pdfFile,
-        imageFile,
+        year: Number(year),
+        institution,
+        images: validImages,
       });
 
-      // Criar o FormData
       const formData = new FormData();
       formData.append('title', title);
-      formData.append('description', description);
-      if (pdfFile) formData.append('pdfFile', pdfFile);
-      if (imageFile) formData.append('imageFile', imageFile);
+      formData.append('year', year);
+      formData.append('institution', institution);
+      validImages.forEach((img, index) => {
+        formData.append(`images`, img); // ou use `images[${index}]` se o backend diferenciar
+      });
 
-      // Enviar os dados para o servidor
       const response = await axios.post('https://upload-api-nodejs.vercel.app/post', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('Dados enviados com sucesso:', response.data);
+      console.log('Sucesso:', response.data);
       alert('Formulário enviado com sucesso!');
     } catch (e) {
       if (e instanceof z.ZodError) {
-        const errorMessages = e.errors.map((err) => err.message);
-        setErrors(errorMessages);
+        const messages = e.errors.map((err) => err.message);
+        setErrors(messages);
       } else {
-        console.error('Erro ao enviar os dados:', e);
-        alert('Erro ao enviar os dados. Tente novamente.');
+        console.error('Erro ao enviar:', e);
+        alert('Erro ao enviar os dados.');
       }
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 600, margin: '0 auto', padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
+      <Typography variant="h5" gutterBottom>
         Formulário de Adição de Disciplina
       </Typography>
 
       {errors.length > 0 && (
-        <Box sx={{ backgroundColor: 'error.main', color: 'white', padding: 2, marginBottom: 2 }}>
-          {errors.map((error, index) => (
-            <Typography key={index}>{error}</Typography>
+        <Box sx={{ bgcolor: 'error.main', color: 'white', p: 2, mb: 2 }}>
+          {errors.map((error, i) => (
+            <Typography key={i}>{error}</Typography>
           ))}
         </Box>
       )}
@@ -96,61 +109,67 @@ export default function Form() {
         required
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        sx={{ marginBottom: 2 }}
+        sx={{ mb: 2 }}
       />
 
       <TextField
-        label="Descrição"
+        label="Ano"
         fullWidth
         required
-        multiline
-        minRows={4}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        sx={{ marginBottom: 2 }}
+        type="number"
+        inputProps={{ min: 2000, max: 2100 }}
+        value={year}
+        onChange={(e) => setYear(e.target.value)}
+        sx={{ mb: 2 }}
       />
 
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Paper
-            sx={{
-              padding: 2,
-              border: '2px dashed grey',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: 100,
-            }}
-            {...getDropzoneProps()}
-          >
-            <input {...getInputProps()} />
-            <Typography variant="body1" textAlign="center">
-              Arraste ou clique para carregar os ficheiros PDF e de Imagem
-            </Typography>
-          </Paper>
-        </Grid>
 
-        <Grid item xs={6}>
-          {pdfFile && <Typography variant="body2">Ficheiro PDF: {pdfFile.name}</Typography>}
-        </Grid>
 
-        <Grid item xs={6}>
-          {imageFile && (
-            <div>
-              <Typography variant="body2">Ficheiro de Capa: {imageFile.name}</Typography>
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Imagem de Capa"
-                  style={{ width: '100%', maxHeight: 300, objectFit: 'cover', marginTop: 10 }}
+      <TextField
+        label="Instituição"
+        fullWidth
+        required
+        value={institution}
+        onChange={(e) => setInstitution(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+
+      <Box>
+        <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
+          Imagens da Disciplina
+        </Typography>
+
+        {images.map((image, index) => (
+          <Grid container spacing={1} alignItems="center" key={index} sx={{ mb: 1 }}>
+            <Grid item xs={10}>
+              <Button component="label" variant="outlined" fullWidth>
+                {image ? image.name : 'Escolher imagem'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    handleImageChange(index, file);
+                  }}
                 />
-              )}
-            </div>
-          )}
-        </Grid>
-      </Grid>
+              </Button>
+            </Grid>
+            <Grid item xs={2}>
+              <IconButton onClick={() => removeImageField(index)} disabled={images.length === 1}>
+                <DeleteIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
+        ))}
 
-      <Button type="submit" variant="contained" sx={{ marginTop: 2 }}>
+        <Button onClick={addImageField} startIcon={<AddIcon />} sx={{ mb: 2 }}>
+          Adicionar imagem
+        </Button>
+      </Box>
+
+
+      <Button type="submit" variant="contained">
         Enviar
       </Button>
     </Box>

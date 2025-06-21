@@ -29,17 +29,21 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`flex flex-col min-h-screen relative`}
+        className={`flex flex-col min-h-screen relative bg-gradient-to-br from-[#418bf61a] to-white`}
       >
+        <div className="absolute inset-0 z-0  bg-[linear-gradient(to_right,#418bf61a_1px,transparent_1px),linear-gradient(to_bottom,#418bf61a_1px,transparent_1px)] bg-[size:40px_40px]" />
         <Header />
-        <div className="w-full flex grow flex-1">
-          {children}
-        </div>
+        {/* <div className="z-10 bg-black relative"> */}
+          <div className="w-full flex grow flex-1">
+            {children}
+          </div>
 
-        <div className="flex">
-          <Footer />
-        </div>
-        <BackToTopButton />
+          <div className="flex">
+            <Footer />
+          </div>
+          <BackToTopButton />
+        {/* </div> */}
+
       </body>
     </html>
   );

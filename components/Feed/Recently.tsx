@@ -46,7 +46,7 @@ export default function Recently() {
 
   return (
     <div
-      className={`md:w-2/5
+      className={`md:w-2/5 z-10
         ${lastScrollY > height ? 'md:fixed top-0 md:pr-32 right-8 md:pl-20' : 'md:pl-20'
         } `}
     >

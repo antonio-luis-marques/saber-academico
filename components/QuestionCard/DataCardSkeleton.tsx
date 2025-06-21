@@ -5,19 +5,7 @@ import { Box, Skeleton} from '@mui/material';
 export function DataCardSkeleton() {
   return (
     <Box
-      sx={{
-        backgroundColor: 'background.paper',
-        borderRadius: 1,
-        boxShadow: 'none',
-        maxWidth: 650,
-        border: '1px solid #ddd',
-        margin: '0 auto',
-        overflow: 'hidden',
-        padding: 2,
-        '@media (max-width:600px)': {
-          maxWidth: '100%',
-        },
-      }}
+      border="1px solid #ddd"  borderRadius={2} p={2} mb={2} sx={{backgroundColor: 'white'}}
     >
       {/* Skeleton do título */}
       <Skeleton variant="text" width="80%" height={30} sx={{ marginBottom: 2 }} />

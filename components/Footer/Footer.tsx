@@ -4,7 +4,7 @@ import React from 'react'
 
 export default function Footer() {
   return (
-    <div className='bg-white text-black md:px-10 md:pt-10 p-4 py-2 space-y-10 w-full h-fit border-t'>
+    <div className='bg-white z-10 text-black md:px-10 md:pt-10 p-4 py-2 space-y-10 w-full h-fit border-t'>
       <div className='flex justify-between flex-wrap'>
         <div className='flex space-x-1 items-center text-lg font-medium'>
           <Image
